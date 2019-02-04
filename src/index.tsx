@@ -60,6 +60,7 @@ if (container) {
         const nowyKolor2 = appState.even ? 'green' : 'orange';
 
         console.info('Nowy kolor', nowyKolor);
+        console.info('appState.even', appState.even);
 
         return h('div', {on: {click: appState.toogle}}, [
             h('span', {style: {color: nowyKolor}}, 'This is bold'),
