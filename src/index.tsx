@@ -49,33 +49,33 @@ class AppState {
     }
 }
 
+const renderView = (appState: AppState) => {
+
+    const nowyKolor = appState.show ? 'red' : 'blue';
+    const nowyKolor2 = appState.even ? 'green' : 'orange';
+
+    console.info('Nowy kolor', nowyKolor);
+    console.info('appState.even', appState.even);
+
+    return h('div', {on: {click: appState.toogle}}, [
+        h('span', {style: {color: nowyKolor}}, 'This is bold'),
+        ` and this is just normal text ${appState.counter},`,
+        h('span', {style: {color: nowyKolor2}}, `is even: ${appState.even}`)
+    ]);
+};
+
+
 var container = document.getElementById('root');
 
 if (container) {
     const appState = new AppState();
 
-    const renderView = (appState: AppState) => {
-
-        const nowyKolor = appState.show ? 'red' : 'blue';
-        const nowyKolor2 = appState.even ? 'green' : 'orange';
-
-        console.info('Nowy kolor', nowyKolor);
-        console.info('appState.even', appState.even);
-
-        return h('div', {on: {click: appState.toogle}}, [
-            h('span', {style: {color: nowyKolor}}, 'This is bold'),
-            ` and this is just normal text ${appState.counter},`,
-            h('span', {style: {color: nowyKolor2}}, `is even: ${appState.even}`)
-        ]);
-    };
-
-
     const vnode = renderView(appState);
-    patch(container, vnode);
+    let node = patch(container, vnode);
 
     autorun(() => {
         const newVnode = renderView(appState);
         console.info('path ...');
-        patch(vnode, newVnode);
+        node = patch(node, newVnode);
     });
 }
