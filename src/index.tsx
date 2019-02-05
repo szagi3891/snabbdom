@@ -101,9 +101,22 @@ if (container) {
     const vnode = renderView(appState);
     let node = patch(container, vnode);
 
+    let updateCounter = 0;
+
     autorun(() => {
+
         const newVnode = renderView(appState);
-        console.info('path ...');
-        node = patch(node, newVnode);
+
+        updateCounter++;
+        const currentUpdateCounter = updateCounter;
+
+        requestAnimationFrame(() => {
+            if (currentUpdateCounter === updateCounter) {
+                console.info('path ...');
+                node = patch(node, newVnode);
+            } else {
+                console.info('skip path');
+            }
+        });
     });
 }
