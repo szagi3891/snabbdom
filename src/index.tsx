@@ -53,6 +53,7 @@ class AppState {
 
 */
 
+/*
 const renderView = (appState: AppState) => {
     const nowyKolor = appState.show ? 'red' : 'blue';
     const nowyKolor2 = appState.even ? 'green' : 'orange';
@@ -91,21 +92,109 @@ const renderView = (appState: AppState) => {
         h('div', listView)
     ]);
 };
+*/
 
+class RenderItem {
+    constructor(
+        readonly text: string
+    ) {
+    }
+
+    @computed get vnode() {
+        return h('div', this.text);
+    }
+}
+
+class RenderView {
+    list: Map<string, RenderItem>;
+
+    constructor(
+        readonly appState: AppState
+    ) {
+        this.list = new Map();
+    }
+
+    @computed get renderHeader() {
+        const nowyKolor = this.appState.show ? 'red' : 'blue';
+        const nowyKolor2 = this.appState.even ? 'green' : 'orange';
+    
+        return h('div', { on: {click: this.appState.toogle} }, [
+            h('span', {style: {color: nowyKolor}}, 'This is bold'),
+            ` and this is just normal text ${this.appState.counter},`,
+            h('span', {style: {color: nowyKolor2}}, `is even: ${this.appState.even}`)
+        ]);
+    }
+
+    @computed get renderInput() {
+        return h('input', {
+            attrs: {
+            },
+            props: {
+                type: 'input',
+                value: this.appState.input
+            },
+            on: {
+                input: this.appState.onInput,
+            }
+        }, [])
+    }
+
+    @computed get renderButton() {
+        return h('span', {
+            on: {
+                click: this.appState.addClick
+            },
+            style: {
+                cursor: 'pointer'
+            }
+        }, `Dodaj`);
+    }
+
+    @computed get renderList() {
+        const newList: Map<string, RenderItem> = new Map();
+
+        for (const textItem of this.appState.list) {
+            const oldItem = this.list.get(textItem);
+            if (oldItem) {
+                newList.set(textItem, oldItem);
+            } else {
+                newList.set(textItem, new RenderItem(textItem));
+            }
+        }
+
+        this.list = newList;
+
+        const out = [];
+        for (const item of this.list.values()) {
+            out.push(item.vnode);
+        }
+        return h('div', out);
+    }
+
+    @computed get vnode() {    
+        return h('div', {}, [
+            this.renderHeader,
+            h('div', { on: {click: this.appState.addClick} }, 'Add item'),
+            this.renderInput,
+            this.renderButton,
+            this.renderList
+        ]);
+    }
+}
 
 var container = document.getElementById('root');
 
 if (container) {
     const appState = new AppState();
 
-    const vnode = renderView(appState);
-    let node = patch(container, vnode);
+    const renderView = new RenderView(appState);
+    let node = patch(container, renderView.vnode);
 
     let updateCounter = 0;
 
     autorun(() => {
 
-        const newVnode = renderView(appState);
+        const newVnode = renderView.vnode;
 
         updateCounter++;
         const currentUpdateCounter = updateCounter;
